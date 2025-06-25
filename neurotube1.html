@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroTube</title>
+    <link rel="icon" href="https://i.imgur.com/pZ8nKf6.png" type="image/png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: #030303;
+        }
+        
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 100;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .logo-icon {
+            color: red;
+            font-size: 24px;
+            margin-right: 5px;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .header-center {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            max-width: 640px;
+            margin: 0 30px;
+        }
+        
+        .search-container {
+            display: flex;
+            flex-grow: 1;
+        }
+        
+        .search-input {
+            flex-grow: 1;
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 2px 0 0 2px;
+            font-size: 16px;
+            outline: none;
+            width: 100%;
+        }
+        
+        .search-button {
+            background-color: #f8f8f8;
+            border: 1px solid #ccc;
+            border-left: none;
+            border-radius: 0 2px 2px 0;
+            padding: 8px 20px;
+            cursor: pointer;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin-left: 20px;
+            cursor: pointer;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXVzZXIiPjxwYXRoIGQ9Ik0xOSAyMXYtMmE0IDQgMCAwIDAtNC00SDlhNCA0IDAgMCAwLTQgNHYyIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSI3IiByPSI0Ii8+PC9zdmc+');
+            background-size: 60%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 240px;
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            background-color: white;
+            overflow-y: auto;
+            padding: 12px 0;
+            border-right: 1px solid #e5e5e5;
+            transition: transform 0.3s;
+            z-index: 99;
+        }
+        
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 24px;
+            cursor: pointer;
+        }
+        
+        .sidebar-item:hover {
+            background-color: #f2f2f2;
+        }
+        
+        .sidebar-item-icon {
+            margin-right: 24px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            margin-left: 240px;
+            padding: 20px;
+            padding-top: 80px;
+            transition: margin-left 0.3s;
+        }
+        
+        .main-content-expanded {
+            margin-left: 0;
+        }
+        
+        .videos-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        
+        @media (max-width: 1200px) {
+            .videos-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .videos-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .videos-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .video-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .video-card:hover {
+            transform: scale(1.02);
+        }
+        
+        .thumbnail {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background-color: #e5e5e5;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        
+        .thumbnail img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .video-duration {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+        
+        .video-info {
+            display: flex;
+        }
+        
+        .channel-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin-right: 12px;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .video-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .channel-name, .video-stats {
+            font-size: 12px;
+            color: #606060;
+        }
+        
+        /* Footer Styles */
+        .footer {
+            background-color: #000;
+            color: #aaa;
+            padding: 40px 20px;
+            margin-top: 40px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .footer-link {
+            margin-right: 20px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .footer-link:hover {
+            color: #fff;
+        }
+        
+        .footer-copyright {
+            font-size: 12px;
+        }
+        
+        /* Video Page Styles */
+        .video-page {
+            display: none;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 80px;
+        }
+        
+        .video-player-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .video-player {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-color: #000;
+            margin-bottom: 20px;
+        }
+        
+        .video-title-page {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .video-stats-page {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        
+        .video-views {
+            font-size: 14px;
+            color: #606060;
+        }
+        
+        .video-actions {
+            display: flex;
+        }
+        
+        .video-action {
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+            cursor: pointer;
+            color: #606060;
+        }
+        
+        .video-action:hover {
+            color: #000;
+        }
+        
+        .video-action-icon {
+            margin-right: 6px;
+        }
+        
+        .video-description {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            white-space: pre-line;
+        }
+        
+        .back-button {
+            display: none;
+            margin-bottom: 20px;
+            cursor: pointer;
+            color: #065fd4;
+            font-weight: 500;
+        }
+        
+        /* Search Results Page */
+        .search-results-page {
+            display: none;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 80px;
+        }
+        
+        .search-result {
+            display: flex;
+            margin-bottom: 16px;
+            cursor: pointer;
+        }
+        
+        .search-result-thumbnail {
+            width: 360px;
+            height: 200px;
+            background-color: #e5e5e5;
+            flex-shrink: 0;
+            margin-right: 16px;
+            position: relative;
+        }
+        
+        .search-result-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .search-result-duration {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+        
+        .search-result-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .search-result-stats {
+            font-size: 12px;
+            color: #606060;
+            margin-bottom: 8px;
+        }
+        
+        .search-result-channel {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .search-result-channel-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin-right: 8px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .search-result-channel-name {
+            font-size: 12px;
+            color: #606060;
+        }
+        
+        .search-result-description {
+            font-size: 12px;
+            color: #606060;
+        }
+        
+        /* Toggle Button */
+        .toggle-sidebar {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-right: 16px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <button class="toggle-sidebar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+</button>
+<div class="logo">
+    <img src="https://i.imgur.com/pZ8nKf6.png" class="logo-icon" alt="NeuroTube Logo" style="width:51px;height:51px">
+    <div class="logo-text">NeuroTube</div>
+</div>
+        </div>
+        <div class="header-center">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search">
+                <button class="search-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="user-avatar"></div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-item">
+            <div class="sidebar-item-icon">🏠</div>
+            <div>Home</div>
+        </div>
+        <div class="sidebar-item">
+            <div class="sidebar-item-icon">🔥</div>
+            <div>Trending</div>
+        </div>
+        <div class="sidebar-item">
+            <div class="sidebar-item-icon">📺</div>
+            <div>Subscriptions</div>
+        </div>
+        <div class="sidebar-item">
+            <div class="sidebar-item-icon">📚</div>
+            <div>Library</div>
+        </div>
+        <div class="sidebar-item">
+            <div class="sidebar-item-icon">🕒</div>
+            <div>History</div>
+        </div>
+        <div class="sidebar-item">
+            <div class="sidebar-item-icon">📼</div>
+            <div>Your videos</div>
+        </div>
+        <div class="sidebar-item">
+            <div class="sidebar-item-icon">👍</div>
+            <div>Liked videos</div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="videos-container" id="videos-container">
+            <!-- Videos will be loaded here -->
+        </div>
+    </div>
+    
+    <!-- Video Page -->
+    <div class="video-page" id="video-page">
+        <div class="back-button" id="back-button">← Back to videos</div>
+        <div class="video-player-container">
+            <div class="video-player" id="video-player"></div>
+            <div class="video-title-page" id="video-title-page"></div>
+            <div class="video-stats-page">
+                <div class="video-views" id="video-views"></div>
+                <div class="video-actions">
+                    <div class="video-action">
+                        <div class="video-action-icon">👍</div>
+                        <div>Like</div>
+                    </div>
+                    <div class="video-action">
+                        <div class="video-action-icon">👎</div>
+                        <div>Dislike</div>
+                    </div>
+                    <div class="video-action">
+                        <div class="video-action-icon">🔗</div>
+                        <div>Share</div>
+                    </div>
+                </div>
+            </div>
+            <div class="video-description" id="video-description"></div>
+        </div>
+    </div>
+    
+    <!-- Search Results Page -->
+    <div class="search-results-page" id="search-results-page">
+        <div class="back-button" id="search-back-button">← Back to videos</div>
+        <div id="search-results-container">
+            <!-- Search results will be loaded here -->
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <div class="footer-link">About</div>
+                <div class="footer-link">Press</div>
+                <div class="footer-link">Copyright</div>
+                <div class="footer-link">Contact us</div>
+                <div class="footer-link">Creators</div>
+                <div class="footer-link">Advertise</div>
+                <div class="footer-link">Developers</div>
+            </div>
+            <div class="footer-links">
+                <div class="footer-link">Terms</div>
+                <div class="footer-link">Privacy</div>
+                <div class="footer-link">Policy & Safety</div>
+                <div class="footer-link">How NeuroTube works</div>
+                <div class="footer-link">Test new features</div>
+            </div>
+            <div class="footer-copyright">
+                © 2023 NeuroTube, a NeuroVision project
+            </div>
+        </div>
+    </div>
+    
+<script>
+    // Sample video data with channel avatars
+    const videos = [
+        {
+            id: '1',
+            title: 'How to fix your AI generated food!🤯 | 2035 GUIDE',
+            thumbnail: 'https://i.imgur.com/I3OSBmu.jpeg',
+            channel: 'AI Fast Cook',
+            channelAvatar: 'https://i.imgur.com/5rY3hfm.png',
+            views: '1.2M views',
+            duration: '10:30',
+            description: 'In this tutorial, I show you how to build a complete website from scratch in just 10 minutes. No prior experience needed!',
+            uploaded: '3 days ago',
+            externalUrl: 'https://neurotube.tilda.ws/'
+        },
+        {
+            id: '2',
+            title: 'Learn JavaScript in 1 Hour',
+            thumbnail: 'https://i.ytimg.com/vi/W6NZfCO5SIk/maxresdefault.jpg',
+            channel: 'Programming with Mosh',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+            views: '5.7M views',
+            duration: '1:02:45',
+            description: 'JavaScript tutorial for beginners. Learn JavaScript in just one hour with this crash course!',
+            uploaded: '2 weeks ago',
+            externalUrl: 'https://www.youtube.com/'
+        },
+        {
+            id: '3',
+            title: 'CSS Grid Layout Crash Course',
+            thumbnail: 'https://i.ytimg.com/vi/0xMQfnTU6oo/maxresdefault.jpg',
+            channel: 'Traversy Media',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/44.jpg',
+            views: '890K views',
+            duration: '45:15',
+            description: 'Learn CSS Grid in 45 minutes with this comprehensive crash course. We cover all the fundamentals you need to know.',
+            uploaded: '1 month ago',
+            externalUrl: 'https://www.tiktok.com/'
+        },
+        {
+            id: '4',
+            title: 'Python for Beginners - Full Course',
+            thumbnail: 'https://i.ytimg.com/vi/_uQrJ0TkZlc/maxresdefault.jpg',
+            channel: 'Programming with Mosh',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+            views: '12.3M views',
+            duration: '6:14:07',
+            description: 'Learn Python programming with this full course for beginners. Contains all the Python basics you need to know.',
+            uploaded: '1 year ago',
+            externalUrl: 'https://neurotube.tilda.ws/'
+        },
+        {
+            id: '5',
+            title: 'React JS Crash Course 2023',
+            thumbnail: 'https://i.ytimg.com/vi/w7ejDZ8SWv8/maxresdefault.jpg',
+            channel: 'Traversy Media',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/44.jpg',
+            views: '1.5M views',
+            duration: '1:48:35',
+            description: 'Get started with React in this crash course. We will be building a task tracker app and learn React fundamentals along the way.',
+            uploaded: '5 months ago',
+            externalUrl: 'https://www.youtube.com/'
+        },
+        {
+            id: '6',
+            title: 'Build a Netflix Clone with React',
+            thumbnail: 'https://i.ytimg.com/vi/x_EEwGe-a9o/maxresdefault.jpg',
+            channel: 'Clever Programmer',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/33.jpg',
+            views: '2.1M views',
+            duration: '2:15:22',
+            description: 'Learn how to build a Netflix clone using React, Firebase, and Styled Components in this full tutorial.',
+            uploaded: '8 months ago',
+            externalUrl: 'https://www.tiktok.com/'
+        },
+        {
+            id: '7',
+            title: 'Node.js and Express.js - Full Course',
+            thumbnail: 'https://i.ytimg.com/vi/Oe421EPjeBE/maxresdefault.jpg',
+            channel: 'freeCodeCamp.org',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/55.jpg',
+            views: '3.7M views',
+            duration: '8:16:48',
+            description: 'Learn how to use Node and Express in this complete course. First, you will learn the fundamentals of Node and Express. Then, you will learn to build a complex API.',
+            uploaded: '1 year ago',
+            externalUrl: 'https://neurotube.tilda.ws/'
+        },
+        {
+            id: '8',
+            title: 'MongoDB in 1 Hour',
+            thumbnail: 'https://i.ytimg.com/vi/-56x56UppqQ/maxresdefault.jpg',
+            channel: 'Web Dev Simplified',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/66.jpg',
+            views: '450K views',
+            duration: '1:05:30',
+            description: 'Learn everything you need to know about MongoDB in just 1 hour. This crash course will teach you all the MongoDB basics.',
+            uploaded: '3 months ago',
+            externalUrl: 'https://www.youtube.com/'
+        },
+        {
+            id: '9',
+            title: 'Build a Discord Bot with Node.js',
+            thumbnail: 'https://i.ytimg.com/vi/-56x56UppqQ/maxresdefault.jpg',
+            channel: 'CodeLyon',
+            channelAvatar: 'https://randomuser.me/api/portraits/women/22.jpg',
+            views: '780K views',
+            duration: '1:32:15',
+            description: 'In this tutorial, you will learn how to build a fully functional Discord bot using Node.js and the Discord.js library.',
+            uploaded: '6 months ago',
+            externalUrl: 'https://www.tiktok.com/'
+        },
+        {
+            id: '10',
+            title: 'Flutter Tutorial for Beginners',
+            thumbnail: 'https://i.ytimg.com/vi/1ukSR1GRtMU/maxresdefault.jpg',
+            channel: 'Academind',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/77.jpg',
+            views: '1.1M views',
+            duration: '3:45:20',
+            description: 'Learn Flutter from scratch in this full tutorial course for beginners. Flutter is Google\'s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.',
+            uploaded: '10 months ago',
+            externalUrl: 'https://neurotube.tilda.ws/'
+        },
+        {
+            id: '11',
+            title: 'Docker Tutorial for Beginners',
+            thumbnail: 'https://i.ytimg.com/vi/3c-iBn73dDE/maxresdefault.jpg',
+            channel: 'TechWorld with Nana',
+            channelAvatar: 'https://randomuser.me/api/portraits/women/33.jpg',
+            views: '2.3M views',
+            duration: '2:10:45',
+            description: 'Docker tutorial for beginners. Learn all the core Docker concepts and commands in this comprehensive Docker course.',
+            uploaded: '1 year ago',
+            externalUrl: 'https://www.youtube.com/'
+        },
+        {
+            id: '12',
+            title: 'Git and GitHub for Beginners',
+            thumbnail: 'https://i.ytimg.com/vi/RGOj5yH7evk/maxresdefault.jpg',
+            channel: 'freeCodeCamp.org',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/55.jpg',
+            views: '4.5M views',
+            duration: '1:08:30',
+            description: 'Learn how to use Git and GitHub in this beginner\'s tutorial. Git is a version control system that lets you manage and keep track of your source code history.',
+            uploaded: '2 years ago',
+            externalUrl: 'https://www.tiktok.com/'
+        },
+        {
+            id: '13',
+            title: 'Data Structures and Algorithms in JavaScript',
+            thumbnail: 'https://i.ytimg.com/vi/t2CEgPsws3U/maxresdefault.jpg',
+            channel: 'freeCodeCamp.org',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/55.jpg',
+            views: '1.8M views',
+            duration: '8:45:50',
+            description: 'Learn common data structures and algorithms in this course. We will implement them in JavaScript so you can understand how they work under the hood.',
+            uploaded: '1 year ago',
+            externalUrl: 'https://neurotube.tilda.ws/'
+        },
+        {
+            id: '14',
+            title: 'Build a Twitter Clone with React',
+            thumbnail: 'https://i.ytimg.com/vi/rJjaqSTzOxI/maxresdefault.jpg',
+            channel: 'Clever Programmer',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/33.jpg',
+            views: '1.2M views',
+            duration: '3:15:10',
+            description: 'In this tutorial, we build a complete Twitter clone using React, Firebase, and Material UI. Learn how to build real-world applications with React.',
+            uploaded: '9 months ago',
+            externalUrl: 'https://www.youtube.com/'
+        },
+        {
+            id: '15',
+            title: 'Full Stack MERN Project',
+            thumbnail: 'https://i.ytimg.com/vi/7CqJlxBYj-M/maxresdefault.jpg',
+            channel: 'Traversy Media',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/44.jpg',
+            views: '1.6M views',
+            duration: '3:22:45',
+            description: 'Build a full stack MERN (MongoDB, Express, React, Node) application with a custom backend API. This is a complete project tutorial.',
+            uploaded: '1 year ago',
+            externalUrl: 'https://www.tiktok.com/'
+        },
+        {
+            id: '16',
+            title: 'Build a Spotify Clone with React',
+            thumbnail: 'https://i.ytimg.com/vi/1hPgQWbWmEk/maxresdefault.jpg',
+            channel: 'Clever Programmer',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/33.jpg',
+            views: '950K views',
+            duration: '4:10:30',
+            description: 'Learn how to build a Spotify clone using React, Firebase, and the Spotify API. This is a complete full-stack project tutorial.',
+            uploaded: '7 months ago',
+            externalUrl: 'https://neurotube.tilda.ws/'
+        },
+        {
+            id: '17',
+            title: 'TypeScript Crash Course',
+            thumbnail: 'https://i.ytimg.com/vi/BCg4U1FzODs/maxresdefault.jpg',
+            channel: 'Traversy Media',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/44.jpg',
+            views: '680K views',
+            duration: '1:45:20',
+            description: 'TypeScript crash course for beginners. Learn all the TypeScript fundamentals you need to know to get started with this superset of JavaScript.',
+            uploaded: '5 months ago',
+            externalUrl: 'https://www.youtube.com/'
+        },
+        {
+            id: '18',
+            title: 'GraphQL Tutorial for Beginners',
+            thumbnail: 'https://i.ytimg.com/vi/Y0lDGjwRYKw/maxresdefault.jpg',
+            channel: 'Web Dev Simplified',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/66.jpg',
+            views: '520K views',
+            duration: '1:30:15',
+            description: 'Learn GraphQL in this complete tutorial for beginners. GraphQL is a query language for APIs that provides a more efficient alternative to REST.',
+            uploaded: '4 months ago',
+            externalUrl: 'https://www.tiktok.com/'
+        },
+        {
+            id: '19',
+            title: 'Build a WhatsApp Clone with React',
+            thumbnail: 'https://i.ytimg.com/vi/pUxrDcITyjg/maxresdefault.jpg',
+            channel: 'Clever Programmer',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/33.jpg',
+            views: '1.3M views',
+            duration: '5:45:10',
+            description: 'In this tutorial, we build a complete WhatsApp clone using React, Firebase, and Material UI. Learn how to build real-time chat applications.',
+            uploaded: '11 months ago',
+            externalUrl: 'https://neurotube.tilda.ws/'
+        },
+        {
+            id: '20',
+            title: 'Vue.js Crash Course',
+            thumbnail: 'https://i.ytimg.com/vi/qZXt1Aom3Cs/maxresdefault.jpg',
+            channel: 'Traversy Media',
+            channelAvatar: 'https://randomuser.me/api/portraits/men/44.jpg',
+            views: '1.1M views',
+            duration: '1:52:30',
+            description: 'Vue.js crash course for beginners. Learn the fundamentals of Vue including components, directives, state management and more.',
+            uploaded: '1 year ago',
+            externalUrl: 'https://www.youtube.com/'
+        }
+    ];
+    
+    // DOM elements
+    const videosContainer = document.getElementById('videos-container');
+    const videoPage = document.getElementById('video-page');
+    const videoPlayer = document.getElementById('video-player');
+    const videoTitlePage = document.getElementById('video-title-page');
+    const videoViews = document.getElementById('video-views');
+    const videoDescription = document.getElementById('video-description');
+    const backButton = document.getElementById('back-button');
+    const searchResultsPage = document.getElementById('search-results-page');
+    const searchResultsContainer = document.getElementById('search-results-container');
+    const searchBackButton = document.getElementById('search-back-button');
+    const searchInput = document.querySelector('.search-input');
+    const searchButton = document.querySelector('.search-button');
+    const toggleSidebar = document.querySelector('.toggle-sidebar');
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    
+    // Render videos on homepage
+    function renderVideos() {
+        videosContainer.innerHTML = '';
+        videos.forEach(video => {
+            const videoElement = document.createElement('div');
+            videoElement.className = 'video-card';
+            videoElement.innerHTML = `
+                <div class="thumbnail">
+                    <img src="${video.thumbnail}" alt="${video.title}">
+                    <div class="video-duration">${video.duration}</div>
+                </div>
+                <div class="video-info">
+                    <div class="channel-icon" style="background-image: url('${video.channelAvatar}')"></div>
+                    <div>
+                        <div class="video-title">${video.title}</div>
+                        <div class="channel-name">${video.channel}</div>
+                        <div class="video-stats">${video.views} • ${video.uploaded}</div>
+                    </div>
+                </div>
+            `;
+            videoElement.addEventListener('click', () => {
+                // Redirect to external URL when video is clicked
+                window.location.href = video.externalUrl;
+            });
+            videosContainer.appendChild(videoElement);
+        });
+    }
+    
+    // Open video page
+    function openVideo(videoId) {
+        const video = videos.find(v => v.id === videoId);
+        if (!video) return;
+        
+        videoTitlePage.textContent = video.title;
+        videoViews.textContent = `${video.views} • ${video.uploaded}`;
+        videoDescription.textContent = video.description;
+        
+        // Simulate video player
+        videoPlayer.innerHTML = `
+            <img src="${video.thumbnail}" style="width:100%;height:100%;object-fit:cover;">
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:white;background-color:rgba(0,0,0,0.7);border-radius:50%;width:80px;height:80px;display:flex;align-items:center;justify-content:center;">▶</div>
+        `;
+        
+        mainContent.classList.add('hidden');
+        videoPage.classList.remove('hidden');
+    }
+    
+    // Search functionality
+    function searchVideos(query) {
+        const results = videos.filter(video => 
+            video.title.toLowerCase().includes(query.toLowerCase()) || 
+            video.channel.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        searchResultsContainer.innerHTML = '';
+        
+        if (results.length === 0) {
+            searchResultsContainer.innerHTML = '<div style="font-size:18px;color:#606060;">No results found</div>';
+        } else {
+            results.forEach(video => {
+                const resultElement = document.createElement('div');
+                resultElement.className = 'search-result';
+                resultElement.innerHTML = `
+                    <div class="search-result-thumbnail">
+                        <img src="${video.thumbnail}" alt="${video.title}">
+                        <div class="search-result-duration">${video.duration}</div>
+                    </div>
+                    <div>
+                        <div class="search-result-title">${video.title}</div>
+                        <div class="search-result-stats">${video.views} • ${video.uploaded}</div>
+                        <div class="search-result-channel">
+                            <div class="search-result-channel-icon" style="background-image: url('${video.channelAvatar}')"></div>
+                            <div class="search-result-channel-name">${video.channel}</div>
+                        </div>
+                        <div class="search-result-description">${video.description}</div>
+                    </div>
+                `;
+                resultElement.addEventListener('click', () => {
+                    // Redirect to external URL when search result is clicked
+                    window.location.href = video.externalUrl;
+                });
+                searchResultsContainer.appendChild(resultElement);
+            });
+        }
+        
+        mainContent.classList.add('hidden');
+        videoPage.classList.add('hidden');
+        searchResultsPage.classList.remove('hidden');
+    }
+    
+    // Event listeners
+    backButton.addEventListener('click', () => {
+        videoPage.classList.add('hidden');
+        mainContent.classList.remove('hidden');
+    });
+    
+    searchBackButton.addEventListener('click', () => {
+        searchResultsPage.classList.add('hidden');
+        mainContent.classList.remove('hidden');
+    });
+    
+searchButton.addEventListener('click', (e) => {
+    e.preventDefault(); // Отменяем действие кнопки
+});
+
+// Оставляем поле ввода рабочим, но отключаем реакцию на Enter
+searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault(); // Запрещаем отправку
+    }
+    // Текст вводится как обычно, но Enter не срабатывает
+});
+    
+    toggleSidebar.addEventListener('click', () => {
+        sidebar.classList.toggle('sidebar-hidden');
+        mainContent.classList.toggle('main-content-expanded');
+    });
+    
+    // Initialize the page
+    renderVideos();
+</script>
+</body>
+</html>
